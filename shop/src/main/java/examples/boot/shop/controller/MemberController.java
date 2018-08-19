@@ -21,7 +21,6 @@ public class MemberController {
         list.add(new Member(2L, "lee", "lee@gmail.com"));
         list.add(new Member(3L, "kang", "kang@gmail.com"));
         modelMap.addAttribute("list", list);
-
         return "list"; // view name return
     }
 }

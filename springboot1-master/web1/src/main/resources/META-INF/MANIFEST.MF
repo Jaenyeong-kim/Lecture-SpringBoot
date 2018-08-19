@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Implementation-Title: spring-demo
+Implementation-Version: 0.0.1-SNAPSHOT
+Build-Jdk: 1.8.0

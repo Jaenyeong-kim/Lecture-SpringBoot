@@ -1,0 +1,1 @@
+org.springframework.context.ApplicationListener=examples.boot.web1.ApplicationStartingEventListener

@@ -1,5 +1,7 @@
 # Spring Boot
   강의 필기
+
+
 # 2018.07.28
 
 WEB-INF
@@ -206,7 +208,6 @@ DevTool가 빌드 했을 때 상위 클래스로더는 놔두고 현재 클래�
 REST API Testing
 postman, restlet(설치)
 
-
 <dependency>
 		<groupId>com.fasterxml.jackson.dataformat</groupId>
 		<artifactId>jackson-dataformat-xml</artifactId>
@@ -216,3 +217,186 @@ postman, restlet(설치)
 Header(MimeType)에 따라 맞춰 전송할 때
 
 타임리프 라이브러리 추가 시 뷰 리졸버에 자동으로 추가 됨
+
+# 2018.08.11
+
+MSA는 개발과 함께 운영, 배포 또한 중요함
+트랜잭션 - 업무, 시스템 작업단위
+커밋, 롤백 개념
+CRUD
+DB-repository
+
+데이터 규모에 따라 샤딩처리
+
+java는 인터페이스만 제공 각 벤더별로 구현체 제공(driver class)
+-> JDBC
+SQL query, 파라미터 바인딩, select 절 컬럼 핸들링이 다름 < 이것만 다르게 처리
+나머지는 동일하게 처리
+IBatis 탄생 > MyBatis 파생
+Spring JDBC
+
+commonCP2
+
+엔티티 매니저는 조회, 삭제 (수정 없음) 메소드 소유
+
+JPA Repository 인터페이스를 상속받는 Repository 엔티티 생성
+그 엔티티를 구현하는 구현체 자동 생성 > 빈 등록
+
+1.Method query 메소드명을 이용해 쿼리 생성
+2.@Query - JPQL, SQL(native query)
+
+QueryDSL - 서드파티 라이브러리
+           JPQL을 클래스타입으로 사용하도록 지원
+           1) Entity 작성
+           2) Entity read, QClass 작성(Mave, Gradle 등 플러그인이 )
+           3) QClass를 이용한 DB 프로그래밍
+
+JPQL, SQL 오타 문제
+Jooq는 오라클 등 사용하면 유료 그 외 무료
+
+dynamic SQL
+            where id = ? and name =?
+
+dynamic JPQL 사용시 편리()
+
+QuerydslRepositorySupport를 상속 받으면
+
+gradle - starter-data-jpa
+
+application.properties
+           .yml(구조적으로 표현)
+
+
+
+@Entity
+@Table
+
+id는 보통 Long(래퍼클래스, 기본형은 null을 가질 수 없음) 자동생성으로 하는것이 좋음
+
+@column 애노테이션(컬럼명 지정시)
+
+@Transactional (readonly = true)
+다른 서비스에서 서비스를 호출할 수도 있음 그 서비스도 트랜잭션일 경우 늦게 호출된 서비스에 트랜잭션은
+그 전 트랜잭션에 편입됨
+
+메세지 컨버터가 DTO를 json으로 변환해 주는데 변환 못하는 속성때문에 에러 출력
+
+starter-jpa-data
+hikaricp (커넥션 풀 객체)
+
+h2database 메모리 디비 - 데이터소스가 설정
+
+
+# 2018.08.18
+lombok 추가시 환경설정 : Compiler > annotation 설정
+스프링부트 프로젝트 생성시 데이터소스가 자동으로
+데이터소스 - 커넥션 풀 만들고 설정됨
+
+Java App이 종료될 때 특별한 기능이 수행되고 싶을 경우
+- Shutdown hook
+  > java 문법
+  > 스프링
+  > Bean이 생성 되려면 생성자가 호출 되어야 함
+    생성자가 호출된 이후에 해당 빈의 특정 메소드를 자동으로 실행할 경우
+  > 모든 Bean이 생성된 후 어떠한 동작을 해야할 경우
+    Bean 생명주기 확인
+  > 데이터베이스 프로그래밍 발전순서(java)
+    JDBC(java.sql) > SQL Mapper, iBatis(MyBatis), Spring JDBC
+    > ORM, Hibernate(구현체)
+    > JPA(표준), EntityManager(영속성관리자), 트랜잭션 단위마다 영속성 컨텍스트가 생성 및 삭제됨
+    트랜잭션이 종료될 때 지연쓰기(sql을 압축실행)
+    > Data JPA(Spring)
+
+Data JPA를 사용하면 JpaRepository 인터페이스를 상속받은 interface를 생성
+해당 인터페이스를 구현하는 객체는 자동으로 Bean으로 등록
+
+JPA에서는 SQL을 일반적으로 사용하지 않고 JPQL을 사용
+SQL은 특정 DB에 종속되기때문에
+Hibernate의 경우 사용하는 DB에 맞는 dialect를 설정
+
+JPQL은 보통 @Query("SELECT b FROM Board b WHERE id = :id")와 같이 사용
+:id > 바인딩하여 사용
+문제는 Dynamic JPQL의 경우
+WHERE id = :id and name = :name, WHERE id = :id and title = :title 와 같이
+where절 조건이 완전 바뀌는 경우가 존재
+
+JpaRepository를 상속받는 BoardRepository를 생성
+Dynamic JPQL 기능이 필요한 메소드를 가지는 BoardRepositoryCustom 인터페이스를 생성
+BoardRepositoryCustom을 구현하는 클래스(BoardRepositoryImpl)를 작성
+- BoardRepositoryImpldp EntityManager를 주입, 동적 JPQL을 사용
+- QuerydslRepositorySupport를 상속받는 BoardRepositoryImpl를 생성
+  QueryDSL을 이용 maven, gradle에 plugin을 설정
+BoardRepository는 Custom 인터페이스를 상속
+
+- Entity를 정의할 수 있어야 함
+- Entity 간의 관계를 설정할 수 있어야 함
+- Entity 간의 관계를 보고 자동 생성되는 table에 유추할 수 있어야 함
+- table을 보고 관련된 Entity 클래스들을 작성할 수 있어야 함
+
+DB 프로그래밍에서 가장 성능을 떨어지게 만드는 원인들 중 하나는 잘못된 select문 실행
+
+Board -- BoardFile
+1대 다 관계
+목록을 출력시 쿼리 1+N 건의 문제가 발생
+1) SELECT b FROM Board b
+2) b.getBoardFiles() // lazyLoading
+   > SELECT bf FROM BoardFile bf WHERE bf.fileId = :fileId
+   해당 리스트에서 하니씩 꺼내 name을 출력
+Board.title, BoardFile.name을 출력
+
+이 문제를 해결 > JPQL fetch join을 사용
+이 때 Entity가 중복되서 가지고 올 수 있기 때문에
+JPQL에 distinct를 사용 혹은 Set 자료 구조 사용
+
+Board(table)     BoardFile(table)
+1                1   1(fk)
+2                2   1(fk)
+3                3   2(fk)
+4                4   2(fk)
+                 5   3(fk)
+
+  BoardRepository 인터페이스(구현체는 자동 생성)
+  1) Method Query (메소드명)
+  2) @Query (JPQL)
+
+  BoardRepositoryImpl (QuerydslRepositorySupport상속)
+  BoardRepositoryCustom을 상속
+  1) EntityManager
+  2) QueryDSL
+  3) plugin 에서 설정
+
+
+@PostConstruct, @PreDestroy
+
+
+- JPA, H2 모듈 추가한 프로젝트 생성
+
+자동으로 in-memory DataSource가 만들어짐
+schema.sql을 실행해서 database 테이블을 자동으로 생성
+data.sql(insert문)을 실행해서 sample data를 자동으로 추가
+EntityManager가 Bean으로 등록됨
+PlatformTransactionManager가 Bean으로 등록됨
+@Transaction 애노테이션 사용
+
+
+https://www.baeldung.com/spring-boot-data-sql-and-schema-sql
+
+스프링은 설정이 잘못되면 Test메소드 자체가 실행이 안됨
+
+자동으로 테이블 생성 시 문자열의 길이 등을 설정하는 방법
+Mysql의 경우 대용량 문자열은 text 타입 > 타입 선언하는 방법
+
+
+단위 테스트
+Mockito 프레임워크
+
+Mock, Spis
+
+spring data jpa 문서
+https://docs.spring.io/spring-data/jpa/docs/current/reference/html/
+
+QuerydslRepositorySupport를 상속 받으면 EntityManager를
+
+JPQL fetch join
+
+schema.sql로도 테이블 생성 가능
