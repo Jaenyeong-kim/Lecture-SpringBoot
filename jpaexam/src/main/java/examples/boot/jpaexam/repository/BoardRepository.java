@@ -2,6 +2,8 @@ package examples.boot.jpaexam.repository;
 
 import examples.boot.jpaexam.domain.Board;
 import examples.boot.jpaexam.repository.custom.BoardRepositoryCustom;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,4 +19,7 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 
     @Query("SELECT distinct b FROM Board b left join fetch b.boardFileList order by b.id")
     List<Board> getBoards();
+
+    @Query("SELECT b FROM Board b order by b.id desc")
+    Page<Board> getBoards(Pageable page);
 }

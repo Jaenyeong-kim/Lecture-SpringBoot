@@ -400,3 +400,71 @@ QuerydslRepositorySupport를 상속 받으면 EntityManager를
 JPQL fetch join
 
 schema.sql로도 테이블 생성 가능
+
+# 2018.08.25
+
+jpaexam 패키지 아래에
+controller, service, security, dto 패키지 생성
+
+jpaexam 프로젝트 maven에 sprinng-boot-starter-web 추가
+
+controller 패키지에 TestApiController 클래스를 생성
+
+jpaexam 프로젝트 maven에 sprinng-boot-starter-security 추가
+
+------------------------------------------------------------
+ManyToMany
+
+Member                        MemberRole
+
+member   member_member_role   member_role
+  1             1(fk)              5
+                5(fk)
+
+회원           주문 상품             상품
+
+data.sql 에서
+암호 1234를
+{bcrypt}$2a$10$9vT04iwbU/VeeeF9AE7vYuOcqNFPPxnC7KgAubX9A4/ISraCL2ubO
+로 변경
+
+service 패키지에 인터페이스, 클래스 생성
+
+interface: MemberService
+class : MemberServiceImpl (MemberService 구현)
+
+MemberService는 2개의 메소드 소유
+Member addMember(Member member)
+Member getMemberByEmail(String email)
+
+userDetailService 구현 시 암호 출력이 안됨
+
+------------------------------------------------------------
+
+config 패키지 생성
+
+WebSecurityConfig 파일 생성
+@Configuration 애노테이션
+
+/members/login 구현
+
+pom.xml > web.jar 라이브러리 추가 (jQuery, Bootstarp)
+
+th:src 는 컨텍스트 경로 때문에 사용
+
+템플릿에서 해당 라이브러리 사용
+
+BoardService 인터페이스
+BoardServiceImpl 클래스 구현
+
+Page<Board> getBoards(int page) // 1이 시작 page
+
+Oauth 2 로그인
+
+Spring Boot doc 내용
+- 스프링 부트 설정 (profile 설정)
+
+Spring boot App 배포
+- 개념, 도커 이용
+
+RestTemplate 학습, 응용
