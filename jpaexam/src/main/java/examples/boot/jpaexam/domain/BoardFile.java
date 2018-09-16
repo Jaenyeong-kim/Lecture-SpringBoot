@@ -1,5 +1,6 @@
 package examples.boot.jpaexam.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +17,7 @@ public class BoardFile {
     // Board
     @ManyToOne
     @JoinColumn(name="board_id")
+    @JsonBackReference
     private Board board;
     private String mimeType;
     private String name; // 오리지널 파일 이름

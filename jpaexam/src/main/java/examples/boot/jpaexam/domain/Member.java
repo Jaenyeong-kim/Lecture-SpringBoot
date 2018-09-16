@@ -1,5 +1,6 @@
 package examples.boot.jpaexam.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,10 +21,12 @@ public class Member {
     private Long id;
     private String name;
     private String email;
+    @JsonIgnore
     private String password;
     @Column(name = "join_date")
     private LocalDateTime joinDate;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "member_member_role",
             joinColumns = @JoinColumn(name = "member_id",

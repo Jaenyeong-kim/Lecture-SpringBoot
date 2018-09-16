@@ -12,3 +12,6 @@ spring:
     username: sa
     password: sa
     initialization-mode: always
+  jackson:
+    serialization:
+      fail-on-empty-beans: false

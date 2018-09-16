@@ -468,3 +468,158 @@ Spring boot App 배포
 - 개념, 도커 이용
 
 RestTemplate 학습, 응용
+
+# 2018.09.01
+
+- java api 문서 생성 방법
+
+- Exceptionn 전략
+  오류 발생시 사용자에게 적절한 화면 보여줌
+
+Controller  ->> @ControllerAdvice 에게 예외 전달
+^
+Service
+^
+Repository
+
+@ControllerAdvice 는 여러 개 선언 가능
+@Controller 에러 발생 시 처리하는 @ControllerAdvice
+@RestController 에러 발생 시 처리하는 @ControllerAdvice
+
+
+에러 메시지 담을 객체 선언
+
+입력값, 비즈니스 로직 수행 시 발생하는 예외 처리
+
+------------------------------------------------------------
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+// Controller애노테이션이 붙은 클래스에 대한 처리
+@ControllerAdvice(annotations = Controller.class)
+@Order(2) // 여러개 선언되었을 때 우선순위가 있다.
+public class GlobalControllerExceptionHandler {
+
+    @ExceptionHandler(value = Exception.class)
+    public String handleException(Exception e) {
+        // e를 로그로 남긴다던지 slack으로 보낸다던지.
+        // view 이름을 리턴
+        return "exceptions/exception";
+    }
+}
+
+-------------------------------------------------------------
+
+오류 메시지를 담을 객체를 선언
+
+@Setter
+@Getter
+public class ApiError {
+    private HttpStatus status;
+    private String message;
+
+
+    public ApiError(HttpStatus status, String message) {
+        super();
+        this.status = status;
+        this.message = message;
+    }
+}
+
+-----------------------------
+
+package examples.boot.jpaexam.controller.advice;
+
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
+
+@ControllerAdvice(annotations = RestController.class)
+@Order(1)
+public class GlobalRestControllerExceptionHandler {
+
+    @ExceptionHandler(value = { Exception.class })
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    protected ApiError handleConflict(RuntimeException e,
+                                      WebRequest request) {
+        ApiError apiError =
+                new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
+                        e.getLocalizedMessage());
+        return apiError;
+    }
+
+}
+
+컨트롤러에 대한 Exception처리를 할 수 있다.
+-------------------------------------------------------
+
+컨트롤러에 대한 예외 처리 가능
+
+@Controller가 viewName 반환시 템플릿 엔진에 의해 처리
+@RestController가 DTO, 객체 빈환 시 메시지 컨버터에 의해 처리
+
+학습 필요 : OSiV, OEMiV
+
+문제점: @RestController에서 Entity 리턴 시 json 으로 변환 > lazyLoading이 될 수 있음
+
+Json 변환 라이브러리 Jackson (ObjectMapper)
+Jackson이 제공하는 애노테이션
+
+Entity 객체는 DTO가 아니다, Entity객체는 Proxy가 사용됨
+
+설정
+jackson:
+  serialization:
+    fail-on-empty-beans: false
+
+Page<Board> <---> BoardFile
+
+BoardFile 에서 Board 쪽으로는 json 메시지 생성하지 않음
+@JsonBAckReference 태깅
+
+@JsonIgnoreProperties(value={"hibernateLazyInitializer", "handler"})
+위와 같은 애노테이션을 Entity 클래스에 붙여 proxy에 자동으로 추가된 속성을 제거할 수 있음
+
+위와 같이 Entity에 붙이는 방법말고 jackson이 제공하는 라이브러리 중에 hibernateX_module
+이를 사용 > Spring의 메시지 컨버터를 수정하는 방법
+
+RestController 에서 Entity 리턴 유무 결정
+Entity -> Dto 값 복사를 쉽게 하는 방법
+학습 필요 : AOP
+
+@Aspect 가 붙어있는 클래스에서 AOP 내용 정의
+
+@Before : 메소드 실행 직전
+@AfterReturning : 메소드 실행 종료 후
+
+위 애노테이션에는 적용할 대상을 지정하는 문자열(포인트컷)
+
+JWT, Spring Session (세션 공유)
+
+학습 필요 : JSR-320 날짜 시간
+          jodaTime 라이브러리
+          자바 기본 Date, Calendar
+
+          RestTemplate도 내부적으로 ObjectMapper(jackson제공) 사용
+          ObjectMapper와 RestTemplate을 다른 id로 여러 bean으로 생성 가능
+
+웹소켓을 지원하지 않는 브라우저를 위한 라이브러리
+socket.io(js)
+SockJS
+
+stomp 프로토콜
+simpleBroker
+RabbitMQ 운영 방법
+
+@SpringBootApplication
+
+heroku
+
+linux 계열
+쉘스크립트 > 안에서 프로그램 실행 시 종료 코드를 받을 수 있음
+
+학습 필요 : slf4j, logback, 셀레니움
